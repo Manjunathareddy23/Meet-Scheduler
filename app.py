@@ -44,9 +44,9 @@ end_time = st.time_input("Select Meeting End Time")
 
 # Dropdown for selecting WhatsApp group link
 whatsapp_groups = {
-    "Team A": "+1234567890",
-    "Team B": "+0987654321",
-    "Team C": "+1122334455"
+    "Team A": "+91 6300138360",
+    "Team B": "+91 8464001960",
+    "Team C": "+91 9121058917"
 }
 group_name = st.selectbox("Select WhatsApp Group", list(whatsapp_groups.keys()))
 
