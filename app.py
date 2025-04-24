@@ -27,6 +27,16 @@ def schedule_whatsapp_message(phone_no, message, scheduled_time):
     threading.Thread(target=send).start()
 
 # UI
+st.markdown("""
+<style>
+h1 {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #6366f1;
+    margin-bottom: 20px;
+}
+</style>
+""", unsafe_allow_html=True)
+
 st.set_page_config(page_title="Meeting Scheduler", layout="centered")
 
 st.markdown("<h1 class='text-3xl font-bold text-center text-indigo-600'>Meeting Scheduler 📅</h1>", unsafe_allow_html=True)
