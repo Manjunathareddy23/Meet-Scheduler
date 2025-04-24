@@ -7,7 +7,7 @@ from twilio.rest import Client
 # Twilio Configuration
 TWILIO_ACCOUNT_SID = ACf09087dcf27809d5dbf62a90df9c1978  # Replace with your Twilio account SID
 TWILIO_AUTH_TOKEN = 30759ef0f8b22335214b41b7ee60b57b  # Replace with your Twilio Auth Token
-WHATSAPP_SENDER = "whatsapp:+91 6300138360"  # Twilio's WhatsApp sandbox number
+WHATSAPP_SENDER = "whatsapp:+14155238886"  # Twilio's WhatsApp sandbox number
 
 # Function to generate a dummy Google Meet link
 def generate_meet_link():
