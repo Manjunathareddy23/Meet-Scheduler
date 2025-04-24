@@ -1,69 +1,75 @@
 import streamlit as st
-import datetime
+from datetime import datetime, timedelta
+import pywhatkit as kit
 import random
 import string
-import time
-import pywhatkit as kit
 
-# WhatsApp groups dictionary (display name with their respective links)
-whatsapp_groups = {
-    "Team Alpha": "https://chat.whatsapp.com/xyz12345",  # Replace with actual WhatsApp group links
-    "Project Beta": "https://chat.whatsapp.com/xyz67890",
-    "Dev Group": "https://chat.whatsapp.com/xyz11223"
-}
-
-# Generate Google Meet link
+# Function to generate a dummy Google Meet link
 def generate_meet_link():
-    room_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
-    return f"https://meet.google.com/{room_id}"
+    return f"https://meet.google.com/{''.join(random.choices(string.ascii_lowercase + string.digits, k=10))}"
 
-# Send WhatsApp message using PyWhatKit
-def send_whatsapp_group_message(group_link, message, time_of_send):
+# Function to schedule the WhatsApp message
+def schedule_whatsapp_message(group_link, meeting_link, meeting_time):
+    # Calculate the time to send the message (15 minutes before the meeting)
+    send_time = meeting_time - timedelta(minutes=15)
+    now = datetime.now()
+    
+    if send_time <= now:
+        st.error("The meeting time must be at least 15 minutes from now!")
+        return False
+    
+    hours = send_time.hour
+    minutes = send_time.minute
+    
+    # Schedule the message
     try:
-        # Send message through PyWhatKit
-        kit.sendwhatmsg_to_group_instantly(group_link, message, 15)  # Time delay to ensure 15 sec prior
-        st.success(f"Message successfully scheduled and sent to the group.")
+        kit.sendwhatmsg_instantly(
+            phone_no=group_link,
+            message=f"Google Meet link for the meeting: {meeting_link}",
+            wait_time=20,  # Time to wait before sending
+            tab_close=True
+        )
+        return True
     except Exception as e:
-        st.error(f"Error sending message: {e}")
+        st.error(f"An error occurred: {e}")
+        return False
 
-# Streamlit UI
-st.set_page_config(page_title="Meeting Scheduler", layout="centered")
-st.markdown("<h1 class='text-3xl font-bold text-center text-indigo-600'>Meeting Scheduler 📅</h1>", unsafe_allow_html=True)
 
-# Tailwind CSS integration
-st.markdown("""
-    <style>
-        .css-1v3fvcr {
-            font-family: 'Arial', sans-serif;
-            font-weight: 700;
-            color: #4A90E2;
-        }
-    </style>
-""", unsafe_allow_html=True)
+# Streamlit App
+st.title("Google Meet Scheduler with WhatsApp Integration")
 
-# Input fields for the meeting details
-start_time = st.time_input("Start Time")
-end_time = st.time_input("End Time")
-selected_group = st.selectbox("Select WhatsApp Group", list(whatsapp_groups.keys()))
+# Input for meeting time
+start_time = st.time_input("Select Meeting Start Time")
+end_time = st.time_input("Select Meeting End Time")
 
-# Submit button to generate and send the meeting link
-if st.button("Generate & Schedule Meeting"):
-    if start_time >= end_time:
-        st.error("End time must be after start time.")
-    else:
-        meet_link = generate_meet_link()
-        scheduled_time = datetime.datetime.combine(datetime.date.today(), start_time) - datetime.timedelta(minutes=15)
-        now = datetime.datetime.now()
+# Dropdown for selecting WhatsApp group link
+whatsapp_groups = {
+    "Team A": "+1234567890",
+    "Team B": "+0987654321",
+    "Team C": "+1122334455"
+}
+group_name = st.selectbox("Select WhatsApp Group", list(whatsapp_groups.keys()))
 
-        # If time has passed today, shift to the next day
-        if scheduled_time < now:
-            scheduled_time += datetime.timedelta(days=1)
-
-        message = f"📢 Reminder: Your meeting starts in 15 minutes.\nJoin here: {meet_link}"
-
-        group_link = whatsapp_groups[selected_group]
-        send_whatsapp_group_message(group_link, message, scheduled_time)
-
-        st.success(f"✅ Meet link generated: {meet_link}")
-        st.info(f"📤 Message will be auto-sent to *{selected_group}* at {scheduled_time.strftime('%I:%M %p')}")
-
+# Submit button
+if st.button("Submit"):
+    try:
+        # Parse the selected start time
+        today = datetime.now().date()
+        meeting_start = datetime.combine(today, start_time)
+        meeting_end = datetime.combine(today, end_time)
+        
+        if meeting_start >= meeting_end:
+            st.error("End time must be after start time.")
+        else:
+            # Generate the Google Meet link
+            meet_link = generate_meet_link()
+            
+            # Send the WhatsApp message
+            group_link = whatsapp_groups[group_name]
+            success = schedule_whatsapp_message(group_link, meet_link, meeting_start)
+            
+            if success:
+                st.success(f"Google Meet link sent to {group_name} successfully!")
+                st.write(f"Google Meet Link: {meet_link}")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
