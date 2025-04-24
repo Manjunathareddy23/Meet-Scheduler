@@ -5,3 +5,5 @@ threading
 random
 string
 time
+selenium 
+pyautogui
